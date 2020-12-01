@@ -28,7 +28,7 @@ module.exports = {
    * @param {number} dayN
    * @param {boolean} [trim]
    */
-  fetchFromAoC(dayN, trim) {
+  fetchFromAoC(dayN, trim = true) {
     if (SESSION == null) {
       console.error(
         [
