@@ -7,8 +7,8 @@ import (
 )
 
 func part1() (int, bool) {
-	var input = aocutil.FetchFromAoC(1, true)
-	var numbers = aocutil.StringsToInts(strings.Split(input, "\n"))
+	input := aocutil.FetchFromAoC(1, true)
+	numbers := aocutil.StringsToInts(strings.Split(input, "\n"))
 
 	for idx, i := range numbers {
 		for _, j := range numbers[idx:] {
@@ -22,8 +22,8 @@ func part1() (int, bool) {
 }
 
 func part2() (int, bool) {
-	var input = aocutil.FetchFromAoC(1, true)
-	var numbers = aocutil.StringsToInts(strings.Split(input, "\n"))
+	input := aocutil.FetchFromAoC(1, true)
+	numbers := aocutil.StringsToInts(strings.Split(input, "\n"))
 
 	for iidx, i := range numbers {
 		for jidx, j := range numbers[iidx:] {

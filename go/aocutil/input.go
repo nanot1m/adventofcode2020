@@ -12,7 +12,7 @@ import (
 
 // FetchFromAoC - fetches data from adventofcode.com/2020/day/%d/input
 func FetchFromAoC(dayN int, trim bool) string {
-	var url = fmt.Sprintf("https://adventofcode.com/2020/day/%d/input", dayN)
+	url := fmt.Sprintf("https://adventofcode.com/2020/day/%d/input", dayN)
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
@@ -37,7 +37,7 @@ func FetchFromAoC(dayN int, trim bool) string {
 
 // StringsToInts - converts lists of strings to list of ints
 func StringsToInts(strs []string) []int {
-	var numbers = []int{}
+	numbers := []int{}
 	for _, line := range strs {
 		num, err := strconv.Atoi(line)
 		if err != nil {
