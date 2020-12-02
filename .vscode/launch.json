@@ -13,7 +13,7 @@
       "envFile": "${workspaceFolder}/.env"
     },
     {
-      "name": "Launch Current Program",
+      "name": "Launch Node Program",
       "program": "${file}",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
