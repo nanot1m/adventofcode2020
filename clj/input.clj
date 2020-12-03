@@ -4,5 +4,7 @@
 (require '[dotenv :refer [env]])
 
 (defn fetch-from-aoc [dayN]
-  (:body (http/get "https://adventofcode.com/2020/day/1/input"
-                   {:headers {:cookie [(str "session=" (env "SESSION"))]}})))
+  (:body
+   (http/get
+    (str "https://adventofcode.com/2020/day/" dayN "/input")
+    {:headers {:cookie [(str "session=" (env "SESSION"))]}})))
