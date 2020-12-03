@@ -3,7 +3,7 @@
 require("./solution")({
   input: () => require("./input").fetchFromAoC(3),
   solve(input) {
-    const map = calc.bind(null, input.split("\n"));
+    const map = input.split("\n");
 
     return [
       () => calc(map, 3, 1),
