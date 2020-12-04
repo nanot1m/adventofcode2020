@@ -21,8 +21,8 @@
     (<= min letter-count max)))
 
 (defn check-xor [[left right ch password]]
-  (let [l (= ch (get password (- left 1)))
-        r (= ch (get password (- right 1)))] (not= l r)))
+  (let [l (= ch (get password (dec left)))
+        r (= ch (get password (dec right)))] (not= l r)))
 
 (println "Part 1:" (count (filter check-min-max (read-inputs))))
 (println "Part 2:" (count (filter check-xor (read-inputs))))

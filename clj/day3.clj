@@ -15,7 +15,7 @@
                  (let [obj (get-in mountain-map [y (mod x width)])]
                    (if (>= y height)
                      acc
-                     (recur (+ x dx) (+ y dy) (if (= obj \#) (+ acc 1) acc)))))]
+                     (recur (+ x dx) (+ y dy) (if (= obj \#) (inc acc) acc)))))]
     (helper 0 0 0)))
 
 (println "Part 1:" (calc-trees (read-map) [3 1]))
