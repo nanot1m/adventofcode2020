@@ -9,31 +9,10 @@ require("./solution")({
 });
 
 /**
- * @param {(x: T) => boolean} isInLeftSide
- * @param {Iterable<T>} xs
- * @param {number} left
- * @param {number} right
- *
- * @template T
- */
-function binSearch(isInLeftSide, xs, left, right) {
-  for (const x of xs) {
-    if (isInLeftSide(x)) {
-      right = right - Math.ceil((right - left) / 2);
-    } else {
-      left = right - Math.floor((right - left) / 2);
-    }
-  }
-  return left;
-}
-
-/**
  * @param {string} line
  */
 function getSeatId(line) {
-  const row = binSearch((ch) => ch === "F", line.slice(0, 7), 0, 127);
-  const col = binSearch((ch) => ch === "L", line.slice(7), 0, 7);
-  return row * 8 + col;
+  return parseInt(line.replace(/[FL]/g, "0").replace(/[BR]/g, "1"), 2);
 }
 
 /**
@@ -44,13 +23,13 @@ function part1(lines) {
 }
 
 /**
- * @param {any} lines
+ * @param {string[]} lines
  */
 function part2(lines) {
-  const ids = new Set(lines.map(getSeatId));
-  for (let i = 0; i < 128 * 8; i++) {
-    if (!ids.has(i) && ids.has(i - 1) && ids.has(i + 1)) {
-      return i;
-    }
-  }
+  return (
+    lines
+      .map(getSeatId)
+      .sort((a, b) => a - b)
+      .find((id, idx, ids) => ids[idx + 1] - id === 2) + 1
+  );
 }
