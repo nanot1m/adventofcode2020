@@ -27,6 +27,8 @@ module.exports = {
    *
    * @param {number} dayN
    * @param {boolean} [trim]
+   *
+   * @returns {Promise<string>}
    */
   fetchFromAoC(dayN, trim = true) {
     if (SESSION == null) {
