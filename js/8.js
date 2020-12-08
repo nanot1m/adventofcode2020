@@ -25,38 +25,38 @@ function parseInput(input) {
 function runProgram(instructions) {
   const computer = {
     state: "init",
-    pos: 0,
+    ip: 0,
     acc: 0,
   };
 
   const visited = {};
 
   while (true) {
-    if (computer.pos === instructions.length) {
+    if (computer.ip === instructions.length) {
       computer.state = "terminated";
       return computer;
     }
 
-    if (visited[computer.pos]) {
+    if (visited[computer.ip]) {
       computer.state = "in_cycle";
       return computer;
     }
-    visited[computer.pos] = true;
+    visited[computer.ip] = true;
 
-    const [command, arg] = instructions[computer.pos];
+    const [command, arg] = instructions[computer.ip];
 
     switch (command) {
       case "acc": {
         computer.acc += arg;
-        computer.pos++;
+        computer.ip++;
         break;
       }
       case "jmp": {
-        computer.pos += arg;
+        computer.ip += arg;
         break;
       }
       case "nop": {
-        computer.pos++;
+        computer.ip++;
         break;
       }
     }
