@@ -8,6 +8,7 @@ const drawLine = (type) => {
   console.log(l + Array(38).fill("─").join("") + r);
 };
 const drawText = (text) => console.log(`│ ${text}`.padEnd(39, " ").concat("│"));
+
 /**
  * @param {Object} config
  * @param {() => string | Promise<string>} config.input
