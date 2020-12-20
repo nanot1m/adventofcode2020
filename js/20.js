@@ -51,12 +51,13 @@ function parseInput(input) {
   const tilePairs = tiles
     .map((tile) => tile.split("\n"))
     .map(([name, ...body]) => [name.slice(5, 9), body]);
-  const tileMap = new Map(tilePairs);
-  return tileMap;
+  return new Map(tilePairs);
 }
 
 /**
  * @param {Map<string, Tile>} tileMap
+ *
+ * @return {{ corners: string[], adjMap: Map<string, string[]> }}
  */
 function getCornersAndAdjMap(tileMap) {
   let corners = [];
@@ -67,7 +68,7 @@ function getCornersAndAdjMap(tileMap) {
     const adj = [];
     for (const [nameB, tileB] of tileMap) {
       if (nameA === nameB) continue;
-      if (isAdj(tileA, tileB)) adj.push(nameB);
+      if (findAdj(tileA, tileB)) adj.push(nameB);
     }
     adjMap.set(nameA, adj);
     if (adj.length === 2) {
@@ -89,29 +90,29 @@ function isOnRight(sourceTile, targetTile) {
 }
 
 /**
- * @param {Tile} sourceTile
+ * @param {Tile} tile
  * @param {Tile} targetTile
  */
-function isOnLeft(sourceTile, targetTile) {
-  return sourceTile.every(
+function isOnLeft(tile, targetTile) {
+  return tile.every(
     (tile, idx) => tile[0] === targetTile[idx][targetTile[idx].length - 1]
   );
 }
 
 /**
- * @param {Tile} sourceTile
+ * @param {Tile} tile
  * @param {Tile} targetTile
  */
-function isOnTop(sourceTile, targetTile) {
-  return sourceTile[0] === targetTile[targetTile.length - 1];
+function isOnTop(tile, targetTile) {
+  return tile[0] === targetTile[targetTile.length - 1];
 }
 
 /**
- * @param {Tile} sourceTile
+ * @param {Tile} tile
  * @param {Tile} targetTile
  */
-function isOnBot(sourceTile, targetTile) {
-  return sourceTile[sourceTile.length - 1] === targetTile[0];
+function isOnBot(tile, targetTile) {
+  return tile[tile.length - 1] === targetTile[0];
 }
 
 /**
@@ -143,40 +144,28 @@ function flipH(tile) {
 }
 
 /**
- * @param {Tile} sourceTile
+ * @param {Tile} tile
  * @param {Tile} targetTile
  */
-function isAdj(sourceTile, targetTile) {
+function findAdj(tile, targetTile) {
   for (let i = 0; i < 4; i++) {
-    if (isOnTop(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Top" };
-    if (isOnRight(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Right" };
-    if (isOnBot(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Bottom" };
-    if (isOnLeft(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Left" };
-    sourceTile = flipV(sourceTile);
-    if (isOnTop(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Top" };
-    if (isOnRight(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Right" };
-    if (isOnBot(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Bottom" };
-    if (isOnLeft(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Left" };
-    sourceTile = flipV(sourceTile);
-    sourceTile = flipH(sourceTile);
-    if (isOnTop(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Top" };
-    if (isOnRight(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Right" };
-    if (isOnBot(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Bottom" };
-    if (isOnLeft(sourceTile, targetTile))
-      return { tile: sourceTile, dir: "Left" };
-    sourceTile = flipH(sourceTile);
-    sourceTile = rotateL(sourceTile);
+    if (isOnTop(tile, targetTile)) return { tile, dir: "Top" };
+    if (isOnRight(tile, targetTile)) return { tile, dir: "Right" };
+    if (isOnBot(tile, targetTile)) return { tile, dir: "Bottom" };
+    if (isOnLeft(tile, targetTile)) return { tile, dir: "Left" };
+    tile = flipV(tile);
+    if (isOnTop(tile, targetTile)) return { tile, dir: "Top" };
+    if (isOnRight(tile, targetTile)) return { tile, dir: "Right" };
+    if (isOnBot(tile, targetTile)) return { tile, dir: "Bottom" };
+    if (isOnLeft(tile, targetTile)) return { tile, dir: "Left" };
+    tile = flipV(tile);
+    tile = flipH(tile);
+    if (isOnTop(tile, targetTile)) return { tile, dir: "Top" };
+    if (isOnRight(tile, targetTile)) return { tile, dir: "Right" };
+    if (isOnBot(tile, targetTile)) return { tile, dir: "Bottom" };
+    if (isOnLeft(tile, targetTile)) return { tile, dir: "Left" };
+    tile = flipH(tile);
+    tile = rotateL(tile);
   }
   return null;
 }
@@ -191,7 +180,7 @@ function getRotatedTiles(tileName, tile, adjMap, tileMap) {
   const adjTiles = adjMap.get(tileName);
   const tiles = [];
   for (const adjTile of adjTiles) {
-    const rotatedTile = isAdj(tileMap.get(adjTile), tile);
+    const rotatedTile = findAdj(tileMap.get(adjTile), tile);
     tiles.push({ ...rotatedTile, name: adjTile });
   }
   return tiles;
@@ -261,24 +250,23 @@ function buildGrid(tileMap, adjMap, init) {
       let pos = { x, y };
       switch (rotatedTile.dir) {
         case "Top": {
-          pos = { x, y: y + 1 };
+          pos.y++;
           break;
         }
         case "Right": {
-          pos = { x: x - 1, y };
+          pos.x--;
           break;
         }
         case "Bottom": {
-          pos = { x, y: y - 1 };
+          pos.y--;
           break;
         }
         case "Left": {
-          pos = { x: x + 1, y };
+          pos.x++;
           break;
         }
       }
-      grid[pos.y] = grid[pos.y] || {};
-      grid[pos.y][pos.x] = rotatedTile.tile;
+      (grid[pos.y] = grid[pos.y] ?? {})[pos.x] = rotatedTile.tile;
       queue.push([rotatedTile.name, rotatedTile.tile, pos]);
     }
   }
