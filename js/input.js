@@ -1,5 +1,5 @@
 // @ts-check
-
+require("./env");
 const https = require("https");
 
 const SESSION = process.env.SESSION;

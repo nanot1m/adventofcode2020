@@ -14,7 +14,10 @@ require("./solution")({
  */
 function part1(input) {
   const tileMap = parseInput(input);
-  const { corners } = getCornersAndAdjMap(tileMap);
+  const adjMap = getAdjacentsMap(tileMap);
+  const corners = [...adjMap]
+    .filter(([, adjs]) => adjs.length === 2)
+    .map(([name]) => name);
   return corners.reduce((a, b) => a * Number(b), 1);
 }
 
@@ -23,21 +26,11 @@ function part1(input) {
  */
 function part2(input) {
   const tileMap = parseInput(input);
-
-  const { adjMap, corners } = getCornersAndAdjMap(tileMap);
-
-  const grid = buildGrid(tileMap, adjMap, corners[0]);
-
+  const grid = buildGrid(tileMap);
   const image = rotateImage(buildImageFromGrid(grid));
-
-  const monsterSize = MONSTER_IMAGE.flatMap((x) =>
-    x.split("").filter((y) => y === "1")
-  ).length;
-
-  const imageLen = image.flatMap((x) => x.split("").filter((y) => y === "#"))
-    .length;
-
-  return imageLen - monsterSize * countMonsters(image);
+  const hashesCount = countInTile(image, "1");
+  const monsterSize = countInTile(MONSTER_IMAGE, "1");
+  return hashesCount - monsterSize * countMonsters(image);
 }
 
 /**
@@ -46,9 +39,11 @@ function part2(input) {
  * @return {Map<string, Tile>}
  */
 function parseInput(input) {
-  const tiles = input.split("\n\n");
   /** @type {Array<[string, Tile]>} */
-  const tilePairs = tiles
+  const tilePairs = input
+    .replace(/\./g, "0")
+    .replace(/\#/g, "1")
+    .split("\n\n")
     .map((tile) => tile.split("\n"))
     .map(([name, ...body]) => [name.slice(5, 9), body]);
   return new Map(tilePairs);
@@ -57,25 +52,35 @@ function parseInput(input) {
 /**
  * @param {Map<string, Tile>} tileMap
  *
- * @return {{ corners: string[], adjMap: Map<string, string[]> }}
+ * @return {Map<string, string[]>}
  */
-function getCornersAndAdjMap(tileMap) {
-  let corners = [];
-
+function getAdjacentsMap(tileMap) {
   /** @type {Map<string, string[]>}*/
-  const adjMap = new Map();
-  for (const [nameA, tileA] of tileMap) {
-    const adj = [];
-    for (const [nameB, tileB] of tileMap) {
-      if (nameA === nameB) continue;
-      if (findAdj(tileA, tileB)) adj.push(nameB);
-    }
-    adjMap.set(nameA, adj);
-    if (adj.length === 2) {
-      corners.push(nameA);
-    }
-  }
-  return { corners, adjMap };
+  const adjacentsMap = new Map();
+  const cache = {};
+  tileMap.forEach((tileA, nameA) => {
+    const adjacents = [...tileMap]
+      .filter(([nameB, tileB]) => {
+        const key = [nameA, nameB].sort().join("");
+        if (key in cache) {
+          return cache[key];
+        }
+        const result = nameA !== nameB && findAdj(tileA, tileB);
+        cache[key] = result;
+        return result;
+      })
+      .map(([name]) => name);
+    adjacentsMap.set(nameA, adjacents);
+  });
+  return adjacentsMap;
+}
+
+/**
+ * @param {Tile} tile
+ * @param {string} ch
+ */
+function countInTile(tile, ch) {
+  return tile.flatMap((line) => line.split("").filter((x) => x === ch)).length;
 }
 
 /**
@@ -119,28 +124,21 @@ function isOnBot(tile, targetTile) {
  * @param {Tile} tile
  */
 function rotateL(tile) {
-  return Array.from(Array(tile.length), (_, idx) =>
-    tile.map((l) => l[l.length - 1 - idx]).join("")
-  );
+  return tile.map((_, idx) => tile.map((l) => l[l.length - 1 - idx]).join(""));
 }
 
 /**
  * @param {Tile} tile
  */
 function flipV(tile) {
-  return Array.from(
-    Array(tile.length),
-    (_, idx) => tile[tile.length - 1 - idx]
-  );
+  return tile.slice().reverse();
 }
 
 /**
  * @param {Tile} tile
  */
 function flipH(tile) {
-  return Array.from(Array(tile.length), (_, y) =>
-    Array.from(tile[y], (_, x) => tile[y][tile[y].length - 1 - x]).join("")
-  );
+  return tile.map((line) => Array.from(line).reverse().join(""));
 }
 
 /**
@@ -149,22 +147,16 @@ function flipH(tile) {
  */
 function findAdj(tile, targetTile) {
   for (let i = 0; i < 4; i++) {
-    if (isOnTop(tile, targetTile)) return { tile, dir: "Top" };
-    if (isOnRight(tile, targetTile)) return { tile, dir: "Right" };
-    if (isOnBot(tile, targetTile)) return { tile, dir: "Bottom" };
-    if (isOnLeft(tile, targetTile)) return { tile, dir: "Left" };
     tile = flipV(tile);
     if (isOnTop(tile, targetTile)) return { tile, dir: "Top" };
     if (isOnRight(tile, targetTile)) return { tile, dir: "Right" };
     if (isOnBot(tile, targetTile)) return { tile, dir: "Bottom" };
     if (isOnLeft(tile, targetTile)) return { tile, dir: "Left" };
-    tile = flipV(tile);
     tile = flipH(tile);
     if (isOnTop(tile, targetTile)) return { tile, dir: "Top" };
     if (isOnRight(tile, targetTile)) return { tile, dir: "Right" };
     if (isOnBot(tile, targetTile)) return { tile, dir: "Bottom" };
     if (isOnLeft(tile, targetTile)) return { tile, dir: "Left" };
-    tile = flipH(tile);
     tile = rotateL(tile);
   }
   return null;
@@ -201,7 +193,7 @@ function countMonsters(image) {
   let result = 0;
   for (let y = 0; y < image.length - 2; y++) {
     for (let x = 0; x < image[y].length - MONSTER_WIDTH; x++) {
-      result += Number(isMonsterAtPos(image, x, y));
+      if (isMonsterAtPos(image, x, y)) result++;
     }
   }
   return result;
@@ -214,10 +206,7 @@ function countMonsters(image) {
  */
 function isMonsterAtPos(image, x, y) {
   for (let dy = 0; dy < MONSTER_IMAGE.length; dy++) {
-    const slice = image[y + dy]
-      .slice(x, x + MONSTER_WIDTH)
-      .replace(/\./g, "0")
-      .replace(/\#/g, "1");
+    const slice = image[y + dy].slice(x, x + MONSTER_WIDTH);
     const sliceBits = parseInt(slice, 2);
     const monsterBits = parseInt(MONSTER_IMAGE[dy], 2);
     if ((sliceBits & monsterBits) !== monsterBits) {
@@ -229,10 +218,10 @@ function isMonsterAtPos(image, x, y) {
 
 /**
  * @param {Map<string, Tile>} tileMap
- * @param {Map<string, string[]>} adjMap
- * @param {string} init
  */
-function buildGrid(tileMap, adjMap, init) {
+function buildGrid(tileMap) {
+  const adjMap = getAdjacentsMap(tileMap);
+  const init = adjMap.keys().next().value;
   /** @type {Record<number, Record<number, Tile>>} */
   const grid = { 0: { 0: tileMap.get(init) } };
   /** @type {Array<[string, Tile, {x: number, y: number}]>} */
@@ -281,11 +270,6 @@ function rotateImage(image) {
   for (let i = 0; i < 4; i++) {
     if (countMonsters(image) > 0) break;
     image = flipH(image);
-
-    if (countMonsters(image) > 0) break;
-    image = flipH(image);
-    image = flipV(image);
-
     if (countMonsters(image) > 0) break;
     image = flipV(image);
     image = rotateL(image);
