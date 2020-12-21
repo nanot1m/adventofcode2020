@@ -1,7 +1,7 @@
 // @ts-check
 
 require("./solution")({
-  input: () => require("./input").fetchFromAoC(3),
+  input: require("./input").fetchFromAoC,
   solve(input) {
     const map = input.split("\n");
 

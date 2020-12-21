@@ -3,7 +3,7 @@ const Lexer = require("./lexer");
 const Parser = require("./parser");
 
 require("./solution")({
-  input: () => require("./input").fetchFromAoC(18),
+  input: require("./input").fetchFromAoC,
   solve: (input) => [() => part1(input), () => part2(input)],
 });
 

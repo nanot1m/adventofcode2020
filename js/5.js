@@ -1,6 +1,6 @@
 // @ts-check
 require("./solution")({
-  input: () => require("./input").fetchFromAoC(5),
+  input: require("./input").fetchFromAoC,
   solve(input) {
     const parsed = input.split("\n");
 

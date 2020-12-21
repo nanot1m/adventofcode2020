@@ -1,7 +1,7 @@
 // @ts-check
 
 require("./solution")({
-  input: () => require("./input").fetchFromAoC(2),
+  input: require("./input").fetchFromAoC,
   solve(input) {
     /** @type {PasswordConfig[]} */
     const passwordConfigs = input

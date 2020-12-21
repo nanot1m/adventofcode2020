@@ -1,7 +1,7 @@
 // @ts-check
 const { performance } = require("perf_hooks");
 
-const runningFile = require("path").parse(process.argv[1]).name;
+const currentDay = require("path").parse(process.argv[1]).name;
 
 const WIDTH = 66;
 
@@ -18,16 +18,16 @@ const drawText = (text) => console.log(`│ ${text.padEnd(WIDTH - 4, " ")} │`)
 
 /**
  * @param {Object} config
- * @param {() => string | Promise<string>} config.input
+ * @param {(day: number) => string | Promise<string>} config.input
  * @param {(input: string) => Array<() => any>} config.solve
  */
 module.exports = async function solution({ input, solve }) {
   await Promise.resolve()
     .then(() => {
       drawLine(1);
-      drawText("Advent of Code. Day " + runningFile);
+      drawText("Advent of Code. Day " + currentDay);
       drawLine();
-      return input();
+      return input(Number(currentDay));
     })
     .then(solve)
     .then((solutions) =>

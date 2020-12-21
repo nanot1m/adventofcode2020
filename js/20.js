@@ -1,7 +1,7 @@
 // @ts-check
 
 require("./solution")({
-  input: () => require("./input").fetchFromAoC(20),
+  input: require("./input").fetchFromAoC,
   solve: (input) => [() => part1(input), () => part2(input)],
 });
 
