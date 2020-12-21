@@ -3,11 +3,18 @@ const { performance } = require("perf_hooks");
 
 const runningFile = require("path").parse(process.argv[1]).name;
 
+const WIDTH = 66;
+
 const drawLine = (type) => {
   let [l, r] = type === 1 ? ["╭", "╮"] : type === 2 ? ["╰", "╯"] : ["├", "┤"];
-  console.log(l + Array(38).fill("─").join("") + r);
+  console.log(
+    `${l}${Array(WIDTH - 2)
+      .fill("─")
+      .join("")}${r}`
+  );
 };
-const drawText = (text) => console.log(`│ ${text}`.padEnd(39, " ").concat("│"));
+
+const drawText = (text) => console.log(`│ ${text.padEnd(WIDTH - 4, " ")} │`);
 
 /**
  * @param {Object} config
